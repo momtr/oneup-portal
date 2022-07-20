@@ -1,0 +1,38 @@
+version: '3.7'
+
+services:
+  proxy:
+    image: jonasal/nginx-certbot:latest
+    platform: linux/amd64
+    ports:
+      - 80:80
+      - 443:443
+    environment:
+      - CERTBOT_EMAIL=mitterdorfer.moritz@gmail.com
+      - DEBUG=1
+    volumes: 
+      - /etc/f2cm/secrets/letsencrypt:/etc/letsencrypt
+      - ./nginx-config:/etc/nginx/user_conf.d:ro
+    restart: unless-stopped
+    networks:
+      - proxy_net
+
+  gitea:
+    image: gitea/gitea:1.16.0
+    container_name: gitea
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+    restart: unless-stopped
+    volumes:
+      - ./.docker/gitea/data:/data
+      - ./gitea_conf:/data/gitea/conf
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - proxy_net
+
+networks:
+  proxy_net:
+    external:
+      name: "f2cm_default"

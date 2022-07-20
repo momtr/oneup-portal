@@ -1,0 +1,50 @@
+version: '3.7'
+services:
+
+  f2cm_mongodb:
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+    volumes:
+      - ../.docker/mongodb:/data/db
+    networks:
+      - f2cm_default
+
+  f2cm_api:
+    build: ../../api
+    platform: linux/amd64
+    environment:
+      - PORT=8080
+      - MONGODB_URL=mongodb://root:root@f2cm_mongodb:27017
+      - ENV=production
+      - NODE_ENV=prod
+      - ADMINS=flo@fla.com;mo3@mi.com;mo6@mit.com;mo7@mit.com;mo8@mit.com;mo9@mit.com;mo10@mit.com;mo11@mit.com;mo12@mit.com;mo13@mit.com;mo14@mit.com;mo15@mit.com
+      - JWT_SECRET=xHqMLElq4A6ypgm7RWJWuORbJm6sAYkLsnzIfyEC1gYCUs0ANZojTDEPimMHoLus
+    volumes:
+      - ../.docker/api/uploads:/usr/src/app/uploads
+    networks:
+      - f2cm_default
+
+  f2cm_web:
+    build: ../../web
+    platform: linux/amd64
+    environment:
+      - NODE_ENV=prod
+    restart: unless-stopped
+    networks:
+      - f2cm_default
+
+  f2cm_proxy:
+    image: nginx:latest
+    restart: unless-stopped
+    volumes:
+      - ./nginx_config/nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - f2cm_default
+    ports:
+      - 80:80
+    
+networks:
+  f2cm_default:
+    name: "f2cm_default"

@@ -1,0 +1,29 @@
+version: '3.7'
+services:
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+    volumes:
+      - ../.docker/mongodb:/data/db
+
+  api:
+    build: ../../api
+    platform: linux/amd64
+    ports:
+      - "80:8080"
+    environment:
+      - PORT=8080
+      - MONGODB_URL=mongodb://root:root@mongodb:27017
+      - ENV=production
+      - NODE_ENV=prod
+      - ADMINS=flo@fla.com;mo3@mi.com;mo6@mit.com;mo7@mit.com;mo8@mit.com;mo9@mit.com;mo10@mit.com;mo11@mit.com;mo12@mit.com;mo13@mit.com;mo14@mit.com;mo15@mit.com
+      - JWT_SECRET=xHqMLElq4A6ypgm7RWJWuORbJm6sAYkLsnzIfyEC1gYCUs0ANZojTDEPimMHoLus
+    volumes:
+      - ../.docker/api/uploads:/usr/src/app/uploads
+
+volumes:
+  mongodb_data_container:
